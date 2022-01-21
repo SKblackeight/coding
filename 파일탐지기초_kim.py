@@ -10,3 +10,5 @@ if b == '89' or b== 'FF':
 else:
     print ("삭제해라")
 
+    
+
