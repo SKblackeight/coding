@@ -44,3 +44,7 @@ def hashcheck(temp):
 if __name__ == "__main__":
     li=['t.png', 'a.jpg']
     hashcheck(li)
+
+
+
+    
