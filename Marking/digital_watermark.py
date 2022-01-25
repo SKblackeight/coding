@@ -1,3 +1,5 @@
+# 수정이 가해지면 워터마크를 잘 못찾음
+
 # pip3 install invisible-watermark
 
 import cv2
