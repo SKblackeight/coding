@@ -3,7 +3,7 @@ from unittest import result
 from matplotlib.pyplot import connect
 import pymysql
 
-hash = hashlib.md5()
+hash = hashlib.sha256()
 afile = open('t.png', 'rb')
 buf = afile.read()
 hash.update(buf)
