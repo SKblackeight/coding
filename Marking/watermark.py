@@ -48,9 +48,9 @@ def img_add2(img):
     
 if __name__ == "__main__":
     img_1 = cv2.imread("test2.jpg")
-    img_QR = qr_img("갓기웅")
+    img_QR = qr_img("송유정 바보")
     img_2 = cv2.cvtColor(np.array(img_QR), cv2.COLOR_RGB2BGR)
-    cv2.imwrite("output.jpg", img_2)
+    cv2.imwrite("QR.jpg", img_2)
     img_out = img_add(img_1, img_2)
     cv2.imwrite("img.jpg", img_out)
     img_add2(img_diff(img_1, img_out))
