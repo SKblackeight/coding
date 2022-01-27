@@ -2,8 +2,14 @@ import json
 import pymysql
 
 class database():
-    def __init__(self):
+    def __init__(self, dbinfo):
         self.db = pymysql.connect(
+            host = dbinfo["host"],
+            port = dbinfo["port"],
+            user = dbinfo["user"],
+            password = dbinfo["passsword"],
+            db = dbinfo["db"],
+            charset = dbinfo["charset"]
         )
         self.cursor = self.db.cursor()
         self.createTable()
@@ -40,7 +46,10 @@ class database():
 
 def lambda_handler(event, context):
     # TODO implement
-    db = database()
+    json_object = {}
+    with open("shadow.json") as f:
+        json_object = json.load(f)
+    db = database(json_object)
     if event == "insert":
         out = db.insert(context)
     else:
