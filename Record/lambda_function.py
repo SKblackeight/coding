@@ -4,12 +4,6 @@ import pymysql
 class database():
     def __init__(self):
         self.db = pymysql.connect(
-            host="reccar.c4zzcvkkrxzn.ap-northeast-2.rds.amazonaws.com",
-            port = 3306,
-            user = "recuser",
-            password= "6jKDpmrs89adX2Op5KiP",
-            db = "recdb",
-            charset="utf8"
         )
         self.cursor = self.db.cursor()
         self.createTable()
