@@ -1,0 +1,74 @@
+from email import header
+from PIL import Image
+from PIL.ExifTags import TAGS
+from PIL.PngImagePlugin import PngImageFile, PngInfo
+import os
+import time
+
+def header_check(path):
+    with Image.open(path["name"]) as img:
+        if (img.format == "JPEG"):
+            path["header"] = "JPEG"
+            path["metadata"] = jpg_info(img)
+        # elif (img.format == "PNG"):
+        #     img_ck.append(png_info(img))
+        else:
+            path["header"] = "other"
+
+
+def jpg_info(jpg):
+    meta_data = jpg.getexif()
+    tag_label = {}
+    for tag, value in meta_data.items():
+        decoded = TAGS.get(tag,tag)
+        tag_label[decoded] = value
+    try:
+        if "UserComment" in tag_label.keys():
+            return meta_date(float(tag_label["UserComment"]))
+        else:
+            return None
+    except:
+        return None
+
+
+def meta_date(user):
+    current_date = time.time()
+    previous_date = user
+    date = (current_date - previous_date)
+    if date>604800:
+        return False
+    else :
+        return True
+
+
+
+def header_write(path, expiration):
+        
+    img = Image.open(path)
+    if (img.format == "JPEG"):
+        jpg_wr_meta(img,expiration)
+
+    img.close()
+
+def jpg_wr_meta(jpg, exDate):
+    
+    meta_data = jpg.getexif()
+    meta_data[0x9286] = exDate
+    jpg.save(jpg.filename, exif = meta_data)
+
+# def makedic(file_list):
+#     dict("")
+if __name__ == "__main__":
+    directory = './dataset/'
+    path = []
+    for i in os.listdir(directory):
+        path.append({"name":directory+i, "header":None, "metadata":None, "hash":None})
+    # print(path)
+    for file_ck in path:
+        header_check(file_ck)
+        # print(file_ck)
+    for i in path:
+        if i["metadata"]:
+            print(i["name"])
+        else:
+            print("삭제")
