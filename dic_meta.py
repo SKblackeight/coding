@@ -51,18 +51,21 @@ def jpg_wr_meta(jpg, exDate):
     meta_data[0x9286] = exDate
     jpg.save(jpg.filename, exif = meta_data)
 
-# def makedic(file_list):
-#     dict("")
+def mkdir_list(directory):
+    list_dir = []
+    for path, dir, files in os.walk(directory):
+        for f in files:
+            list_dir.append({"name":path+"/"+f, "header":None, "metadata":None, "hash":None})
+    return list_dir
+
 if __name__ == "__main__":
-    directory = './temp/'
-    path = []
-    for i in os.listdir(directory):
-        path.append({"name":directory+i, "header":None, "metadata":None, "hash":None})
-    for file_ck in path:
+    list_dir = mkdir_list("./dataset/")
+    for file_ck in list_dir:
         header_check(file_ck)
         if file_ck["header"] == "JPEG":
             meta_date(file_ck["metadata"])
         print(file_ck)
-    for file_ck in path:
-        if not(file_ck["metadata"]):
-            os.remove(file_ck["name"])
+
+    # for file_ck in path:
+    #     if not(file_ck["metadata"]):
+    #         os.remove(file_ck["name"])
