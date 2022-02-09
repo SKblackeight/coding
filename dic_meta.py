@@ -15,7 +15,6 @@ def header_check(path):
         else:
             path["header"] = "other"
 
-
 def jpg_info(jpg):
     meta_data = jpg.getexif()
     tag_label = {}
@@ -31,19 +30,15 @@ def jpg_info(jpg):
         return None
 
 
-def meta_date(user):
+def meta_date(previous_date):
     current_date = time.time()
-    previous_date = user
     date = (current_date - previous_date)
-    if date>604800:
+    if date > 604800:
         return False
     else :
         return True
 
-
-
 def header_write(path, expiration):
-        
     img = Image.open(path)
     if (img.format == "JPEG"):
         jpg_wr_meta(img,expiration)
@@ -59,16 +54,15 @@ def jpg_wr_meta(jpg, exDate):
 # def makedic(file_list):
 #     dict("")
 if __name__ == "__main__":
-    directory = './dataset/'
+    directory = './temp/'
     path = []
     for i in os.listdir(directory):
         path.append({"name":directory+i, "header":None, "metadata":None, "hash":None})
-    # print(path)
     for file_ck in path:
         header_check(file_ck)
-        # print(file_ck)
-    for i in path:
-        if i["metadata"]:
-            print(i["name"])
-        else:
-            print("삭제")
+        if file_ck["header"] == "JPEG":
+            meta_date(file_ck["metadata"])
+        print(file_ck)
+    for file_ck in path:
+        if not(file_ck["metadata"]):
+            os.remove(file_ck["name"])
