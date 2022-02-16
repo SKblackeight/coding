@@ -6,33 +6,40 @@ import boto3
 from urllib.parse import unquote_plus
 import pymysql
 import json
-import os, sys
+import os, sys, logging
 import uuid, base64, time
 import hashlib
+
+logger = logging.getLogger()
+logger.setLevel(logging.INFO)
 
 def qr_img(code):
     qr = qrcode.QRCode()
     qr.add_data(code)
     qr.make()
-    return qr.make_image(fill_color="black", back_color="#010101")
+    return qr.make_image(fill_color="black", back_color="#020202")
 
 def img_add(src1, src2):
     src1_width = src1.shape[0]
     src1_height = src1.shape[1]
-    src1 = cv2.subtract(src1,np.ones((src1_width,src1_height,3), np.uint8))
+    src1 = cv2.subtract(src1,2*np.ones((src1_width,src1_height,3), np.uint8))
     src2 = cv2.resize(src2, dsize=(src1_height,src1_width))
     return cv2.add(src1, src2)
 
 def rds_config():
     DB_HOST = os.environ["DB_HOST"]
-    DB_PORT = int(os.environ["DB_PORT"])
+    DB_PORT = os.environ["DB_PORT"]
     DB_NAME = os.environ["DB_NAME"]
     DB_USER = os.environ["DB_USER"]
     DB_PASS = os.environ["DB_PASS"]
-    # try:
-    return pymysql.connect(host=DB_HOST, port=DB_PORT, user=DB_USER, password=DB_PASS, db=DB_NAME, charset="utf8")
-    # except:
-    #     return False
+
+    os.environ['LIBMYSQL_ENABLE_CLEARTEXT_PLUGIN'] = '1'
+    try:
+        logger.info("Connecting to Database...")
+        return pymysql.connect(host=DB_HOST, user=DB_USER, passwd=DB_PASS, port=int(DB_PORT), database=DB_NAME, connect_timeout=5)
+    except Exception as e:
+        logger.error("Database connection failed due to {}".format(e))
+        return False
 
 def jpg_wr_meta(jpg, path, exDate):
     meta_data = jpg.getexif()
@@ -42,26 +49,29 @@ def jpg_wr_meta(jpg, path, exDate):
 def hashing(hfile):
     hash = hashlib.sha256()
     hash.update(hfile)
-    return str(hash.hexdigest())
+    return hash.hexdigest()
 
 def lambda_handler(event, context):
     S3_BUCKET = os.environ["S3_BUCKET"]
     KEY = unquote_plus(event['key'])
     USER = unquote_plus(event['user'])
     TMPKEY = KEY.strip('/')[-1]
-    CODE = USER + str(uuid.uuid4())
+    CODE = USER + "-" + str(uuid.uuid4())
 
+    logger.info("S3 connection start")
     try:
         s3_client = boto3.client('s3')
         img1_path = "/tmp/{}.jpg".format(uuid.uuid4(), TMPKEY)
         with open(img1_path, "w+b") as img1:
             s3_client.download_fileobj(S3_BUCKET, KEY, img1)
-    except:
+    except Exception as e:
+        logger.error("S3 connection failed due to {}".format(e))
         return {
             "status_code" : 500,
             "body" : "Can not found S3 object"
         }
 
+    logger.info("start convert lambda image")
     img_1 = cv2.imread(img1_path)
     img_2 = cv2.cvtColor(np.array(qr_img(CODE)), cv2.COLOR_RGB2BGR)
     npimg = cv2.cvtColor(img_add(img_1, img_2), cv2.COLOR_BGR2RGB)
@@ -74,8 +84,10 @@ def lambda_handler(event, context):
     rds = rds_config()
     if rds:
         with rds.cursor() as cursor:
-            query = "INSERT INTO rec VALUES(hash=%s,event=%s)"
-            cursor.excute(query,(hash,CODE))
+            query = "INSERT INTO rec VALUES(%s,%s)"
+            cursor.execute(query,(hash,CODE))
+            logger.info("excuted")
+            rds.commit()
 
         # Exit the Lambda function: return the status code  
         return {
