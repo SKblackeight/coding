@@ -52,3 +52,8 @@ def detect_car(filedir):
         if i in indexes:
             if 'licence_plate' == str(classes[class_ids[i]]):
                 filedir.is_car = True
+                
+    cv2.imshow("Image", img)
+    cv2.waitKey()  
+
+    cv2.destroyAllWindows()
