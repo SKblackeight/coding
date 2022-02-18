@@ -1,7 +1,6 @@
 from tkinter import *
 
 def pop(dir):
-   
     window = Tk()
     window.title("Black_Eight")
     window.geometry("350x350")
@@ -9,7 +8,9 @@ def pop(dir):
     
     text =Text(window)
     text.insert(END, '\n  < 파일 목록 >  \n\n')
-    text.insert(END, dir)
+    for file in dir:
+        text.insert(END, file)
+        text.insert(END, "\n")
     text.insert(END, '\n\n\n  총 ')
  
     text.insert(END, len(dir))

@@ -17,7 +17,7 @@ def qr_img(code):
     qr = qrcode.QRCode()
     qr.add_data(code)
     qr.make()
-    return qr.make_image(fill_color="black", back_color="#020202")
+    return qr.make_image(fill_color='black', back_color='#020202')
 
 def img_add(src1, src2):
     src1_width = src1.shape[0]
@@ -27,19 +27,19 @@ def img_add(src1, src2):
     return cv2.add(src1, src2)
 
 def rds_config():
-    DB_HOST = os.environ["DB_HOST"]
-    DB_PORT = os.environ["DB_PORT"]
-    DB_NAME = os.environ["DB_NAME"]
-    DB_USER = os.environ["DB_USER"]
-    DB_PASS = os.environ["DB_PASS"]
+    DB_HOST = os.environ['DB_HOST']
+    DB_PORT = os.environ['DB_PORT']
+    DB_NAME = os.environ['DB_NAME']
+    DB_USER = os.environ['DB_USER']
+    DB_PASS = os.environ['DB_PASS']
 
     os.environ['LIBMYSQL_ENABLE_CLEARTEXT_PLUGIN'] = '1'
     try:
-        logger.info("Connecting to Database...")
+        logger.info('Connecting to Database...')
         return pymysql.connect(host=DB_HOST, user=DB_USER, passwd=DB_PASS, port=int(DB_PORT), database=DB_NAME, connect_timeout=5)
     except Exception as e:
-        logger.error("Database connection failed due to {}".format(e))
-        return False
+        logger.error('Database connection failed due to {}'.format(e))
+        raise Exception('[InternalServerError] Can not acccess rec db')
 
 def jpg_wr_meta(jpg, path, exDate):
     meta_data = jpg.getexif()
@@ -52,31 +52,27 @@ def hashing(hfile):
     return hash.hexdigest()
 
 def lambda_handler(event, context):
-    S3_BUCKET = os.environ["S3_BUCKET"]
+    S3_BUCKET = os.environ['S3_BUCKET']
     KEY = unquote_plus(event['key'])
     USER = unquote_plus(event['user'])
     TMPKEY = KEY.strip('/')[-1]
-    CODE = USER + "-" + str(uuid.uuid4())
+    CODE = USER + '-' + str(uuid.uuid4())
 
-    logger.info("S3 connection start")
     try:
         s3_client = boto3.client('s3')
-        img1_path = "/tmp/{}.jpg".format(uuid.uuid4(), TMPKEY)
-        with open(img1_path, "w+b") as img1:
+        img1_path = '/tmp/{}.jpg'.format(uuid.uuid4(), TMPKEY)
+        with open(img1_path, 'w+b') as img1:
             s3_client.download_fileobj(S3_BUCKET, KEY, img1)
     except Exception as e:
-        logger.error("S3 connection failed due to {}".format(e))
-        return {
-            "status_code" : 500,
-            "body" : "Can not found S3 object"
-        }
+        logger.error('S3 connection failed due to {}'.format(e))
+        raise Exception('[BadRequest] Can not found S3 object')
 
-    logger.info("start convert lambda image")
     img_1 = cv2.imread(img1_path)
     img_2 = cv2.cvtColor(np.array(qr_img(CODE)), cv2.COLOR_RGB2BGR)
     npimg = cv2.cvtColor(img_add(img_1, img_2), cv2.COLOR_BGR2RGB)
     jpg_wr_meta(Image.fromarray(npimg),img1_path, time.time())
-    with open(img1_path, "rb") as img1:
+    
+    with open(img1_path, 'rb') as img1:
         buf = img1.read()
         hash = hashing(buf)
         b64_str = base64.b64encode(buf)
@@ -84,30 +80,27 @@ def lambda_handler(event, context):
     rds = rds_config()
     if rds:
         with rds.cursor() as cursor:
-            query = "INSERT INTO rec VALUES(%s,%s)"
+            query = 'INSERT INTO rec VALUES(%s,%s)'
             cursor.execute(query,(hash,CODE))
-            logger.info("excuted")
+            logger.info('excuted')
             rds.commit()
 
         # Exit the Lambda function: return the status code  
         return {
-            "status_code": 200,
-            'header' : {
+            'statusCode': '200',
+            'headers' : {
                 'Timestamp' : time.time(),
                 'Content-Length' : json.dumps(sys.getsizeof(b64_str)),
-                'Content-Type' : "image/jpeg",
-                'Content-Disposition' : json.dumps("attachment;filename={}".format(uuid.uuid4())),
+                'Content-Type' : 'image/jpeg',
+                'Content-Disposition' : json.dumps('attachment;filename={}'.format(uuid.uuid4())),
             },
-            "isBase64Encoded": True,
-            "body": b64_str.decode('utf-8')
+            'isBase64Encoded': True,
+            'body': b64_str.decode('utf-8')
         }
     else:
-        return {
-            "status_code": 500,
-            "body" : "Can not acccess rec db"
-        }
+        raise Exception('[InternalServerError] Can not acccess rec db')
 
     # img3 = (img_add(img1_path, img2_path))
-    # s3 = boto3.client("s3")
+    # s3 = boto3.client('s3')
     # s3.write_get_object_response(Body=img3,RequestRoute=route,RequestToken=token)
-    # return {"status_code": 200}
+    # return {'status_code': 200}
