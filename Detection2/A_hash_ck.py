@@ -51,5 +51,5 @@ def hash_com2 (filedir):
 def query_hash (query_list):
     hash_list = json.dumps({"hash_list":query_list})
     url = "https://tptbrdc0i5.execute-api.ap-northeast-2.amazonaws.com/RecodeAPI"
-    response = requests.post(url, data=hash_list, timeout=6) #3초 지나면 exception 발생
+    response = requests.post(url, data=hash_list, timeout=6) #6초 지나면 exception 발생
     return response.text

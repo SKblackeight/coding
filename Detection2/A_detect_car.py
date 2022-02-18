@@ -1,12 +1,11 @@
 ## filedir -> filedir.path로 수정
-## return 부분을 없애고 file.is_car 수정
+## return 부분을 없애고 file.plate 수정
 
-from glob import escape
 from PIL import Image
 from PIL.ExifTags import TAGS
 from PIL.PngImagePlugin import PngImageFile, PngInfo
 import numpy as np
-import os,shutil,cv2
+import cv2
 
 def detect_car(filedir):
     net = cv2.dnn.readNet("yolov4-ANPR.weights", "yolov4-ANPR.cfg")
@@ -50,5 +49,7 @@ def detect_car(filedir):
 
     for i in range(len(boxes)):
         if i in indexes:
-            if 'licence_plate' == str(classes[class_ids[i]]):
-                filedir.is_car = True
+            label = str(classes[class_ids[i]])
+            if 'licence_plate' == label:
+                filedir.plate = True
+                filedir.delete = True

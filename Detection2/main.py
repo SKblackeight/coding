@@ -14,7 +14,7 @@ class File(BaseModel):
     hash : str
     confirmed : bool
     metadata : float
-    is_car : bool
+    plate : bool
     delete : bool
 
 if __name__ == "__main__":
@@ -25,7 +25,7 @@ if __name__ == "__main__":
     for path, dir, files in os.walk(dic_dir):
         for name in files:
             file_path = os.path.join(path,name)
-            file_list.append(File(path=file_path, header="", hash=False, confirmed=False, metadata=0.0, is_car=False,delete=False))
+            file_list.append(File(path=file_path, header="", hash=False, confirmed=False, metadata=0.0, plate=False,delete=False))
 
     # is jpg?
     for file in file_list:
@@ -48,16 +48,8 @@ if __name__ == "__main__":
         if file.header == "jpg" and not(file.confirmed):
             A_detect_car.detect_car(file)
 
-    need_to_delete = []
-    for file in file_list:
-        if file.delete:
-            need_to_delete.append(file.path.split("/")[-1])
-
-    for file in file_list:
-        print(file.delete, file.is_car, file.metadata, file.path)
-
     # popup 
-    A_pop.pop(need_to_delete)    #만료일자 지나지 않은 것 팝업
+    A_pop.pop(file_list)    #만료일자 지나지 않은 것 팝업
 
 
     #             # a = A_hash_ck.hash_com(filedir)
