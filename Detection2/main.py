@@ -5,6 +5,7 @@ import A_header_ck
 import A_hash_ck
 import A_meta
 import A_pop
+import time
 from pydantic import BaseModel
 
 # File Type
@@ -18,7 +19,7 @@ class File(BaseModel):
     delete : bool
 
 if __name__ == "__main__":
-    dic_dir ='Detection/SKB'
+    dic_dir ='Detection2/SKB'
     file_list=[]
 
     # make file_list
@@ -42,16 +43,23 @@ if __name__ == "__main__":
     for file in file_list:
         if file.header == "jpg":
             A_meta.jpg_info(file)
-        if file.confirmed:
-            print(file.path)
+
+    # car licence check
+    for file in file_list:
+        if file.header == "jpg" and not(file.confirmed):
+            A_detect_car.detect_car(file)
 
     need_to_delete = []
     for file in file_list:
         if file.delete:
             need_to_delete.append(file.path.split("/")[-1])
 
+    for file in file_list:
+        print(file.delete, file.is_car, file.metadata, file.path)
+
     # popup 
     A_pop.pop(need_to_delete)    #만료일자 지나지 않은 것 팝업
+
 
     #             # a = A_hash_ck.hash_com(filedir)
     #             # print(a)
