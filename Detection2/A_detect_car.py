@@ -1,3 +1,6 @@
+## filedir -> filedir.path로 수정
+## return 부분을 없애고 file.is_car 수정
+
 from glob import escape
 from PIL import Image
 from PIL.ExifTags import TAGS
@@ -12,7 +15,6 @@ def detect_car(filedir):
         classes = [line.strip() for line in f.readlines()]
     layer_names = net.getLayerNames()
     output_layers = [layer_names[i-1] for i in net.getUnconnectedOutLayers()]
-    colors = np.random.uniform(0, 255, size=(len(classes), 3))
 
     img = cv2.imread(filedir.path)
     img = cv2.resize(img, None, fx=0.5, fy=0.5)
@@ -50,6 +52,3 @@ def detect_car(filedir):
         if i in indexes:
             if 'licence_plate' == str(classes[class_ids[i]]):
                 filedir.is_car = True
-                escape
-            else:
-                continue

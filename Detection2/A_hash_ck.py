@@ -1,3 +1,6 @@
+## hash_com을 pydantic에 맞게 수정
+## localhost의 DB에서 requests로 API-Gateway에 질의
+
 import hashlib                       
 import pymysql
 import requests

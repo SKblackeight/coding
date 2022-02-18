@@ -3,6 +3,7 @@ from PIL import Image
 from PIL.ExifTags import TAGS
 from PIL.PngImagePlugin import PngImageFile, PngInfo
 import os
+import time
 
 def header_check(path):
     with Image.open(path["name"]) as img:
@@ -13,7 +14,6 @@ def header_check(path):
         #     img_ck.append(png_info(img))
         else:
             path["header"] = "other"
-
 
 def jpg_info(jpg):
     meta_data = jpg.getexif()
@@ -29,28 +29,23 @@ def jpg_info(jpg):
     except:
         return None
 
-def header_write(path, expiration):
-        
-    img = Image.open(path)
+def header_write(img_file, expiration): 
+    img = Image.open(img_file["name"])
     if (img.format == "JPEG"):
         jpg_wr_meta(img,expiration)
-
     img.close()
 
 def jpg_wr_meta(jpg, exDate):
-    
     meta_data = jpg.getexif()
     meta_data[0x9286] = exDate
     jpg.save(jpg.filename, exif = meta_data)
 
-def makedic(file_list):
-    dict("")
 if __name__ == "__main__":
-    directory = 'temp'
+    directory = './temp/'
     path = []
     for i in os.listdir(directory):
         path.append({"name":directory+i, "header":None, "metadata":None, "hash":None})
     # print(path)
     for file_ck in path:
         # print(file_ck["name"])
-        header_check(file_ck)
+        header_write(file_ck, float(time.time() - 604800))

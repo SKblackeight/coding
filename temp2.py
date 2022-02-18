@@ -1,3 +1,4 @@
+from email import header
 from PIL import Image
 from PIL.ExifTags import TAGS
 from PIL.PngImagePlugin import PngImageFile, PngInfo
@@ -5,18 +6,14 @@ from PIL.PngImagePlugin import PngImageFile, PngInfo
 import os
 
 def header_check(path):
-    img_ck = []
-
-    img = Image.open(path)
-    if (img.format == "JPEG"):
-        img_ck.append(jpg_info(img))
-    # elif (img.format == "PNG"):
-    #     img_ck.append(png_info(img))
-    else:
-        img_ck.append(None)
-    img.close()
-    for i in img_ck:
-        print (i)
+    with Image.open(path["name"]) as img:
+        if (img.format == "JPEG"):
+            path["header"] = "JPEG"
+            path["metadata"] = jpg_info(img)
+        # elif (img.format == "PNG"):
+        #     img_ck.append(png_info(img))
+        else:
+            path["header"] = "other"
 
 
 def jpg_info(jpg):
@@ -47,14 +44,15 @@ def jpg_wr_meta(jpg, exDate):
     meta_data[0x9286] = exDate
     jpg.save(jpg.filename, exif = meta_data)
 
+def makedic(file_list):
+    dict("")
 if __name__ == "__main__":
-    
     directory = 'temp'
+    path = []
     for i in os.listdir(directory):
-        path = directory+i
-        header_write(path, "2022:11:21 18:18:18")
-
-    for i in os.listdir(directory):
-        path = directory+i
-        header_check(path)
+        path.append({"name":directory+i, "header":None, "metadata":None, "hash":None})
+    # print(path)
+    for file_ck in path:
+        print(file_ck["name"])
+        # header_check(file_ck)
 

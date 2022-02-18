@@ -6,7 +6,7 @@ import A_meta
 import A_pop
 
 if __name__ == "__main__":
-    dirdir ='address'
+    dirdir ='Detection/SKB'
    
     file_list=[]    
     for path, dir, files in os.walk(dirdir):

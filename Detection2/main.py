@@ -1,11 +1,10 @@
-# from msilib.schema import File
+## pydantic 사용하도록 수정
+## 각 함수별 기능 호출을 절차적 실행
 import os
 import A_detect_car
-import A_header_ck
 import A_hash_ck
 import A_meta
 import A_pop
-import time
 from pydantic import BaseModel
 
 # File Type

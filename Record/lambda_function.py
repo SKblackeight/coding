@@ -19,17 +19,17 @@ class database():
         self.cursor.execute(create_hash_table_query)
         self.db.commit()
 
-    def search(self, data:str) -> bool:
+    def search(self, data:str) -> str:
         try:
             select_query = "SELECT value FROM hash WHERE value = %s"
             self.cursor.execute(select_query, data)
 
             if data in self.cursor:
-                return True
+                return data
             else:
-                return False
+                return ""
         except:
-            return None
+            return "Fail"
 
     def insert(self, data:str) -> bool:
         try:
