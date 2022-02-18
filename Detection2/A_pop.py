@@ -18,7 +18,7 @@ def pop(dir):
     ## 창 생성
     window = Tk()
     window.title("Black_Eight")
-    window.geometry("350x350")
+    window.geometry("350x5000")
     window.resizable(width=False,height=False)
     
     text =Text(window)

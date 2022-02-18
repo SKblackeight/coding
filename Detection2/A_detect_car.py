@@ -14,6 +14,7 @@ def detect_car(filedir):
         classes = [line.strip() for line in f.readlines()]
     layer_names = net.getLayerNames()
     output_layers = [layer_names[i-1] for i in net.getUnconnectedOutLayers()]
+    colors = np.random.uniform(0, 255, size=(len(classes), 3))
 
     img = cv2.imread(filedir.path)
     img = cv2.resize(img, None, fx=0.5, fy=0.5)
@@ -46,10 +47,24 @@ def detect_car(filedir):
                 class_ids.append(class_id) 
  
     indexes = cv2.dnn.NMSBoxes(boxes, confidences, 0.5, 0.4)
+    font = cv2.FONT_HERSHEY_PLAIN
 
     for i in range(len(boxes)):
         if i in indexes:
+            x, y, w, h = boxes[i]
             label = str(classes[class_ids[i]])
-            if 'licence_plate' == label:
+            color = colors[i]
+            cv2.rectangle(img, (x, y), (x + w, y + h), color, 2)
+            cv2.putText(img, label, (x, y + 30), font, 3, color, 3)
+
+            label = str(classes[class_ids[i]])
+            if 'car_license' == label:
                 filedir.plate = True
                 filedir.delete = True
+            else:
+                continue
+
+    # cv2.imshow("Image", img)
+    # cv2.waitKey()  
+
+    # cv2.destroyAllWindows()

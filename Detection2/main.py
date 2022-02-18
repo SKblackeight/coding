@@ -47,6 +47,7 @@ if __name__ == "__main__":
     for file in file_list:
         if file.header == "jpg" and not(file.confirmed):
             A_detect_car.detect_car(file)
+        print(file)
 
     # popup 
     A_pop.pop(file_list)    #만료일자 지나지 않은 것 팝업
