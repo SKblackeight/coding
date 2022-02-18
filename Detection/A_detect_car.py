@@ -1,8 +1,9 @@
 from PIL import Image
 from PIL.ExifTags import TAGS
+from PIL.PngImagePlugin import PngImageFile, PngInfo
 import numpy as np
-import os,cv2
-from pydantic import BaseModel
+import os,shutil,cv2
+
 
 def detect_car(filedir):
     net = cv2.dnn.readNet("yolov4-ANPR.weights", "yolov4-ANPR.cfg")
@@ -49,44 +50,25 @@ def detect_car(filedir):
     font = cv2.FONT_HERSHEY_PLAIN
     for i in range(len(boxes)):
         if i in indexes:
-            # x, y, w, h = boxes[i]
+            x, y, w, h = boxes[i]
             label = str(classes[class_ids[i]])
-            # color = colors[i]
-            # cv2.rectangle(img, (x, y), (x + w, y + h), color, 2)
-            # cv2.putText(img, label, (x, y + 30), font, 3, color, 3)
+            color = colors[i]
+            cv2.rectangle(img, (x, y), (x + w, y + h), color, 2)
+            cv2.putText(img, label, (x, y + 30), font, 3, color, 3)
         
 
             if label == 'licence_plate':
+
             # filedir.close()
             # os.remove(filedir) #제거
                 print (filedir)
+    
                 # file_destination = ''
                 # shutil.move(filedir, file_destination)  #이동       
             else:
                 continue
 
-    # cv2.imshow("Image", img)
-    # cv2.waitKey()  
+    cv2.imshow("Image", img)
+    cv2.waitKey()  
 
-    # cv2.destroyAllWindows()
-
-class File(BaseModel):
-    path : str
-    header : str
-    hash : str
-    confirmed : bool
-    metadata : float
-    is_car : bool
-    delete : bool
-
-if __name__ == "__main__":
-    dic_dir ='Detection/SKB'
-    file_list=[]
-
-    # make file_list
-    for path, dir, files in os.walk(dic_dir):
-        for name in files:
-            file_path = os.path.join(path,name)
-            file_list.append(File(path=file_path, header="", hash=False, confirmed=False, metadata=0.0, is_car=False,delete=False))
-    for file in file_list:
-        detect_car(file.path)
+    cv2.destroyAllWindows()
