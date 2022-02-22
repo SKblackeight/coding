@@ -18,7 +18,7 @@ class File(BaseModel):
     delete : bool
 
 if __name__ == "__main__":
-    dic_dir ='Detection2/SKB'
+    dic_dir ='C:/SKB/'
     file_list=[]
 
     # make file_list
@@ -54,7 +54,8 @@ if __name__ == "__main__":
             need_to_delete.append(file.path.split("/")[-1])
 
     for file in file_list:
-        print(file.delete, file.is_car, file.metadata, file.path)
+        # print(file.delete, file.is_car, file.metadata, file.path)
+        print(file)
 
     # popup 
     A_pop.pop(need_to_delete)    #만료일자 지나지 않은 것 팝업
